@@ -132,7 +132,7 @@ No OpenAI API key is required.
 Clone the repository:
 
 ```bash
-git clone YOUR_REPOSITORY_URL
+git clone https://github.com/betulaltunyuva/ai-research-assistant.git
 cd ai-research-assistant
 ```
 
@@ -249,3 +249,8 @@ MODEL_MAX_OUTPUT_TOKENS = 300
 ## Disclaimer
 
 This project is an experimental AI research assistant. Generated information and automated verification results should not be treated as guaranteed factual correctness.
+
+## Developer
+
+**Betül Altunyuva**  
+GitHub: https://github.com/betulaltunyuva
