@@ -1,6 +1,42 @@
+# Virtual environment
 .venv/
+venv/
+
+# Environment variables / secrets
 .env
+.env.*
+!.env.example
+
+# Python cache
 __pycache__/
-*.pyc
+*.py[cod]
 .pytest_cache/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Generated files
 outputs/
+documents/uploads/
+
+# Local databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+
+# Model/cache files
+.cache/
+
+# Local test documents
+/documents/
+
+# Old manual test scripts in project root
+/test_*.py

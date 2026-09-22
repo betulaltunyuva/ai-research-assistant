@@ -1,256 +1,542 @@
-# AI Research Assistant
+# 🔎 AI Research Assistant
 
-A local multi-agent research system that searches the web, analyzes sources, generates structured reports, verifies claims, and automatically revises the report when necessary.
+AI Research Assistant is a multi-agent research platform that combines live web research, local document analysis, Retrieval-Augmented Generation (RAG), persistent memory, and local AI models in a single workflow.
 
-Built with **LangGraph, LangChain, Ollama, and Qwen3**.
+The system can research a user query using both web sources and uploaded documents, analyze the collected information, generate a structured report, verify the result, automatically revise it when necessary, and export the final report as PDF or DOCX.
 
-## Overview
+---
 
-AI Research Assistant uses multiple specialized AI agents instead of relying on a single LLM call.
+## ✨ Features
 
-The system follows a complete research workflow:
+- 🤖 Multi-Agent Research Workflow
+- 🌐 Live Web Research
+- 📄 PDF, DOCX and TXT Document Support
+- 🧠 Retrieval-Augmented Generation (RAG)
+- 🔍 FAISS Vector Search
+- 🧩 Local Text Embeddings
+- 💾 Persistent SQLite Memory
+- 💬 Follow-up Questions
+- 🗂️ Research Sessions
+- 📊 Live Agent Status Tracking
+- ✅ Automatic Verification and Revision
+- 🚀 FastAPI Backend
+- 🖥️ Streamlit Web Interface
+- 📄 PDF Report Export
+- 📝 DOCX Report Export
+- 🧪 Automated Tests with Pytest
+- 🐳 Docker & Docker Compose Support
+- 🔐 Environment-based Configuration
+
+---
+
+## 🧠 Multi-Agent Architecture
+
+The research process is handled by four specialized agents:
+
+### 1. Researcher
+
+Collects information from live web sources and, when available, uploaded documents.
+
+### 2. Analyst
+
+Analyzes the collected material and identifies the most relevant information for the research question.
+
+### 3. Writer
+
+Creates the final structured research report based on the analyzed evidence.
+
+### 4. Verifier
+
+Checks the generated report for consistency and source support.
+
+If a correction is required, the report is automatically sent back to the Writer for revision.
 
 ```text
 User Query
-    ↓
-Researcher Agent
-    ↓
-Web Search & Source Selection
-    ↓
-Web Page Reading
-    ↓
-Analyst Agent
-    ↓
-Writer Agent
-    ↓
-Verifier Agent
-    ↓
-Revision if Needed
-    ↓
-Final Research Report
+    │
+    ▼
+Researcher
+    │
+    ▼
+Analyst
+    │
+    ▼
+Writer
+    │
+    ▼
+Verifier
+    │
+    ├── Approved ──► Final Report
+    │
+    └── Revision Required
+              │
+              ▼
+            Writer
+              │
+              ▼
+           Verifier
 ```
 
-## Features
+---
 
-- Multi-agent workflow with LangGraph
-- Local LLM execution with Ollama
-- Web search with DDGS
-- Real web page content extraction
-- Basic source quality scoring
-- Researcher, Analyst, Writer and Verifier agents
-- Source-based citations
-- Automatic report verification
-- Automatic revision loop
-- Human-review status for unresolved verification issues
-- Markdown report generation
-- Research history logging
-- Research duration and source tracking
-- Configurable project settings
-- Ollama and model availability checks
-- Basic error handling
+## 🔎 RAG Pipeline
 
-## Agents
+Uploaded documents are processed through a local RAG pipeline.
 
-**Researcher Agent**  
-Searches the web, selects sources, reads web pages and prepares source-based research notes.
+```text
+Document
+   │
+   ▼
+Text Extraction
+   │
+   ▼
+Chunking
+   │
+   ▼
+Local Embeddings
+   │
+   ▼
+FAISS Vector Index
+   │
+   ▼
+Semantic Retrieval
+   │
+   ▼
+Relevant Context
+   │
+   ▼
+Local LLM
+```
 
-**Analyst Agent**  
-Compares the collected information, identifies key findings and prepares a structured analysis.
+This allows the assistant to answer questions using relevant sections of uploaded documents instead of sending the entire document to the model.
 
-**Writer Agent**  
-Transforms the analysis into a readable research report with citations and references.
+---
 
-**Verifier Agent**  
-Checks whether claims, dates, statistics and citations are supported by the collected sources.
+## 📄 Supported Documents
 
-If problems are detected, the report is automatically sent back to the Writer Agent for revision.
+The platform currently supports:
 
-## Tech Stack
+- `.pdf`
+- `.docx`
+- `.txt`
 
-- Python
-- LangGraph
-- LangChain
-- Ollama
-- Qwen3 4B Instruct
-- DDGS
-- BeautifulSoup
-- Requests
+Uploaded documents can be used together with live web research.
 
-## Project Structure
+---
+
+## 🧠 Persistent Memory
+
+Research history and conversations are stored using SQLite.
+
+The memory system supports:
+
+- Session-based conversations
+- Previous user messages
+- Assistant responses
+- Previous research topics
+- Research results
+- Follow-up questions
+
+Using the same session name allows previous context to be reused.
+
+---
+
+## 📊 Live Agent Status
+
+The Streamlit interface displays the current state of every agent in real time.
+
+Example:
+
+```text
+✅ Researcher — Completed
+✅ Analyst — Completed
+⏳ Writer — Running
+○ Verifier — Waiting
+```
+
+The interface also reflects automatic Writer → Verifier revision cycles.
+
+---
+
+## 📑 Research Reports
+
+Completed research can be exported as:
+
+- Markdown
+- Microsoft Word (`.docx`)
+- PDF (`.pdf`)
+
+Generated reports are stored locally inside the output directory.
+
+---
+
+## 🏗️ Project Structure
 
 ```text
 ai-research-assistant/
 │
 ├── agents/
-│   ├── researcher.py
 │   ├── analyst.py
-│   ├── writer.py
-│   └── verifier.py
+│   ├── researcher.py
+│   ├── verifier.py
+│   └── writer.py
+│
+├── tests/
+│   ├── test_agent_status.py
+│   ├── test_chunking.py
+│   ├── test_document_reader.py
+│   ├── test_faiss.py
+│   ├── test_memory.py
+│   ├── test_report_exporter.py
+│   ├── test_routing.py
+│   └── test_web_search.py
 │
 ├── utils/
-│   ├── web_search.py
+│   ├── agent_status.py
+│   ├── conversation_memory.py
+│   ├── document_rag.py
+│   ├── document_reader.py
+│   ├── embedding.py
 │   ├── page_reader.py
+│   ├── report_exporter.py
 │   ├── report_saver.py
-│   └── system_check.py
+│   ├── system_check.py
+│   ├── text_chunker.py
+│   ├── vector_store.py
+│   └── web_search.py
 │
+├── api.py
 ├── config.py
+├── main.py
 ├── settings.py
 ├── state.py
-├── main.py
+├── web_app.py
+│
+├── Dockerfile
+├── docker-compose.yml
+├── .dockerignore
+├── .gitignore
 ├── requirements.txt
 └── README.md
 ```
 
-## How It Works
+---
 
-1. The user enters a research topic.
-2. The Researcher Agent searches the web.
-3. Sources are ranked and selected.
-4. Relevant content is extracted from selected web pages.
-5. The Analyst Agent analyzes the collected information.
-6. The Writer Agent creates a structured report.
-7. The Verifier Agent checks the report against the sources.
-8. If necessary, the report is automatically revised once.
-9. The final report is saved locally as a Markdown file.
+## 🛠️ Technology Stack
 
-## Local LLM
+### Backend
 
-The project uses Ollama to run the language model locally.
+- Python
+- FastAPI
+- Uvicorn
 
-Current model:
+### Frontend
 
-```text
-qwen3:4b-instruct
-```
+- Streamlit
 
-No OpenAI API key is required.
+### AI & Retrieval
 
-> The language model runs locally, but web searches and public web page requests still require an internet connection.
+- Local LLM through Ollama
+- LangChain
+- Sentence Transformers
+- FAISS
+- RAG
 
-## Installation
+### Data & Memory
 
-Clone the repository:
+- SQLite
+
+### Document Processing
+
+- PDF parsing
+- python-docx
+- TXT parsing
+
+### Reporting
+
+- ReportLab
+- python-docx
+
+### Testing
+
+- Pytest
+
+### Deployment
+
+- Docker
+- Docker Compose
+
+---
+
+## ⚙️ Local Installation
+
+### 1. Clone the repository
 
 ```bash
-git clone https://github.com/betulaltunyuva/ai-research-assistant.git
+git clone <repository-url>
 cd ai-research-assistant
 ```
 
-Create a virtual environment:
+### 2. Create a virtual environment
 
-```bash
-python -m venv .venv
-```
-
-Activate it on Windows:
+Windows:
 
 ```powershell
-.\.venv\Scripts\Activate.ps1
+python -m venv .venv
+.venv\Scripts\activate
 ```
 
-Install dependencies:
+### 3. Install dependencies
 
-```bash
-pip install -r requirements.txt
+```powershell
+python -m pip install -r requirements.txt
 ```
 
-Install Ollama and download the model:
+### 4. Configure environment variables
 
-```bash
-ollama pull qwen3:4b-instruct
-```
+Create a `.env` file in the project root.
 
-## Usage
+Sensitive information such as API keys should be stored only in this file.
 
-Run:
+The `.env` file is excluded from Git.
 
-```bash
-python main.py
-```
+### 5. Start Ollama
 
-Then enter a research topic:
+Make sure Ollama is installed and the configured local model is available.
+
+The local Ollama address defaults to:
 
 ```text
-Araştırmak istediğiniz konuyu yazın:
+http://127.0.0.1:11434
 ```
 
-Example:
+The model and related settings can be configured in `settings.py`.
+
+---
+
+## ▶️ Running Locally
+
+Two services are required.
+
+### Terminal 1 — FastAPI
+
+```powershell
+uvicorn api:api --reload
+```
+
+API documentation:
 
 ```text
-Yapay zekanın yazılım geliştirmede kullanım alanları
+http://127.0.0.1:8000/docs
 ```
 
-## Output
+### Terminal 2 — Streamlit
 
-Generated reports are saved under:
+```powershell
+streamlit run web_app.py
+```
+
+Web interface:
 
 ```text
-outputs/reports/
+http://localhost:8501
 ```
 
-Research execution history is stored in:
+---
+
+## 🚀 API Endpoints
+
+The FastAPI backend provides endpoints for:
 
 ```text
-outputs/history.jsonl
+GET   /
+GET   /health
+POST  /upload
+POST  /research
+POST  /research/start
+GET   /research/status/{job_id}
+POST  /ask
+GET   /sessions
+GET   /reports
 ```
 
-The `outputs/` directory is excluded from Git tracking.
-
-At the end of a research session, the system can display information such as:
+Interactive Swagger documentation is available at:
 
 ```text
-Yapılan otomatik düzeltme sayısı: 1
-Kullanılan kaynak sayısı: 3
-Toplam araştırma süresi: 120.45 saniye
-Son durum: DOĞRULANDI
+http://127.0.0.1:8000/docs
 ```
 
-If verification problems remain after the allowed revision:
+---
+
+## 🧪 Automated Tests
+
+The project includes automated tests for core components such as:
+
+- Document reading
+- Text chunking
+- FAISS retrieval
+- Persistent memory
+- Agent status tracking
+- Report exporting
+- Agent routing
+- Web search utilities
+
+Run all tests with:
+
+```powershell
+python -m pytest tests -q
+```
+
+---
+
+## 🐳 Docker
+
+The project includes both a `Dockerfile` and `docker-compose.yml`.
+
+Docker Compose starts two services:
 
 ```text
-Son durum: İNSAN İNCELEMESİ GEREKLİ
+ai-research-api
+ai-research-web
 ```
 
-## Configuration
+### Build
 
-Main settings can be changed from `settings.py`.
-
-Examples include:
-
-```python
-MODEL_NAME = "qwen3:4b-instruct"
-SEARCH_RESULT_COUNT = 3
-PAGE_MAX_CHARS = 1000
-MAX_REVISIONS = 1
-MODEL_TEMPERATURE = 0
-MODEL_MAX_OUTPUT_TOKENS = 300
+```powershell
+docker compose build
 ```
 
-## Limitations
+### Start
 
-- Source ranking is heuristic-based.
-- Some websites may block automated access.
-- JavaScript-heavy pages may not be fully readable.
-- The Verifier Agent is also an LLM and can make mistakes.
-- Local inference speed depends on the computer's hardware.
-- Important research results should still be reviewed by a human.
+```powershell
+docker compose up -d
+```
 
-## Future Improvements
+### Check containers
 
-- RAG and vector database support
-- PDF and academic paper research
-- Improved citation validation
-- Parallel agent execution
-- Streamlit or Gradio interface
-- PDF/DOCX export
-- Automated tests
-- Docker support
+```powershell
+docker compose ps
+```
 
-## Disclaimer
+### Open the services
 
-This project is an experimental AI research assistant. Generated information and automated verification results should not be treated as guaranteed factual correctness.
+FastAPI:
 
-## Developer
+```text
+http://127.0.0.1:8000/docs
+```
 
-**Betül Altunyuva**  
-GitHub: https://github.com/betulaltunyuva
+Streamlit:
+
+```text
+http://localhost:8501
+```
+
+### Stop
+
+```powershell
+docker compose down
+```
+
+Inside Docker, the API communicates with the host Ollama service through:
+
+```text
+http://host.docker.internal:11434
+```
+
+---
+
+## 🔐 Security
+
+Sensitive and generated files are excluded from version control, including:
+
+```text
+.env
+.venv/
+outputs/
+documents/
+documents/uploads/
+*.db
+*.sqlite
+*.sqlite3
+__pycache__/
+.pytest_cache/
+```
+
+Never commit API keys or credentials directly to the repository.
+
+---
+
+## 🔄 Research Workflow
+
+```text
+User enters a research question
+          │
+          ▼
+Optional document upload
+          │
+          ▼
+Web + Document Retrieval
+          │
+          ▼
+Researcher
+          │
+          ▼
+Analyst
+          │
+          ▼
+Writer
+          │
+          ▼
+Verifier
+          │
+          ├── Revision needed ──► Writer
+          │
+          ▼
+Final Research Report
+          │
+          ├── PDF
+          └── DOCX
+```
+
+---
+
+## 🎯 Project Goals
+
+This project was developed to explore how a production-style research assistant can combine:
+
+- Multi-agent AI systems
+- Retrieval-Augmented Generation
+- Semantic search
+- Local AI models
+- Live web research
+- Persistent memory
+- API-based architecture
+- Automated verification
+- Containerized deployment
+
+The architecture is designed to be modular so that individual components such as the embedding model, LLM, retrieval system, agents, and user interface can be extended independently.
+
+---
+
+## 📌 Future Improvements
+
+Possible future extensions include:
+
+- Streaming model responses
+- Source credibility scoring
+- Additional document formats
+- User authentication
+- Research history search
+- Advanced citation verification
+- Cloud deployment
+- Additional local and remote LLM providers
+- Improved observability and logging
+
+---
+
+## 👩‍💻 Developer
+
+Developed by **Betül Altunyuva**
+
+Software Engineering

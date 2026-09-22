@@ -1,10 +1,14 @@
 import requests
+from settings import (
+    MODEL_NAME,
+    OLLAMA_BASE_URL
+)
 
 
 def check_ollama(model_name: str):
     try:
         response = requests.get(
-            "http://localhost:11434/api/tags",
+            f"{OLLAMA_BASE_URL}/api/tags",
             timeout=3
         )
 

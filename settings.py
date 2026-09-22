@@ -1,6 +1,13 @@
+import os
+
 PROJECT_NAME = "AI Research Assistant"
 
 MODEL_NAME = "qwen3:4b-instruct"
+
+OLLAMA_BASE_URL = os.getenv(
+    "OLLAMA_BASE_URL",
+    "http://127.0.0.1:11434"
+)
 
 SEARCH_RESULT_COUNT = 3
 PAGE_MAX_CHARS = 1000

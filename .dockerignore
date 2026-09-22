@@ -1,0 +1,15 @@
+.venv
+__pycache__
+*.pyc
+.pytest_cache
+.git
+.gitignore
+
+.env
+
+outputs
+documents/uploads
+
+*.db
+*.sqlite
+*.sqlite3
