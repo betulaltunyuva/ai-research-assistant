@@ -102,7 +102,23 @@ def validate_research_request(
     )
 
     if document_path:
-        if not Path(document_path).exists():
+        resolved_path = Path(
+            document_path
+        ).resolve()
+
+        # Sadece yükleme klasöründeki belgelere izin verir.
+        if not resolved_path.is_relative_to(
+            UPLOAD_DIR.resolve()
+        ):
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    "Sadece yüklenen belgeler "
+                    "kullanılabilir."
+                )
+            )
+
+        if not resolved_path.is_file():
             raise HTTPException(
                 status_code=404,
                 detail="Belge bulunamadı."
