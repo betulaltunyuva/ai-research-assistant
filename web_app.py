@@ -703,6 +703,9 @@ with right_column:
                         f"Araştırma başarısız: {error}"
                     )
 
+# Sonuç, sağ sütuna sıkışmasın diye sekmenin tam genişliğinde gösterilir.
+with research_tab:
+
     # -----------------------------------------------------
     # ARAŞTIRMA SONUCU
     # -----------------------------------------------------
