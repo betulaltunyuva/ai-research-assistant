@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="320" viewBox="0 0 1280 320" role="img" aria-label="AI Research Assistant — multi-agent research with web search, RAG, and local LLMs">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0f172a"/>
+      <stop offset="0.6" stop-color="#1e1b4b"/>
+      <stop offset="1" stop-color="#312e81"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.82" cy="0.5" r="0.55">
+      <stop offset="0" stop-color="#6366f1" stop-opacity="0.45"/>
+      <stop offset="1" stop-color="#6366f1" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#38bdf8"/>
+      <stop offset="1" stop-color="#a78bfa"/>
+    </linearGradient>
+    <clipPath id="card">
+      <rect width="1280" height="320" rx="24"/>
+    </clipPath>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#a5b4fc"/>
+    </marker>
+  </defs>
+
+  <g clip-path="url(#card)">
+    <rect width="1280" height="320" fill="url(#bg)"/>
+    <rect width="1280" height="320" fill="url(#glow)"/>
+    <g stroke="#ffffff" stroke-opacity="0.05">
+      <path d="M0 80 H1280 M0 160 H1280 M0 240 H1280 M160 0 V320 M320 0 V320 M480 0 V320 M640 0 V320 M800 0 V320 M960 0 V320 M1120 0 V320"/>
+    </g>
+  </g>
+
+  <g font-family="'Segoe UI', -apple-system, BlinkMacSystemFont, Helvetica, Arial, sans-serif">
+    <!-- Icon -->
+    <rect x="72" y="62" width="56" height="56" rx="14" fill="#ffffff" fill-opacity="0.1" stroke="#ffffff" stroke-opacity="0.25"/>
+    <circle cx="97" cy="87" r="12" fill="none" stroke="url(#accent)" stroke-width="4"/>
+    <line x1="106" y1="96" x2="115" y2="105" stroke="url(#accent)" stroke-width="4" stroke-linecap="round"/>
+    <text x="144" y="97" font-size="18" font-weight="600" fill="#c7d2fe">Multi-Agent Research Platform</text>
+
+    <!-- Title -->
+    <text x="72" y="186" font-size="56" font-weight="800" fill="#ffffff" letter-spacing="-1">AI Research Assistant</text>
+    <text x="74" y="228" font-size="21" fill="#cbd5e1">Web search + document RAG + local LLMs, verified and exported as reports</text>
+
+    <g font-size="14" font-weight="600" fill="#e0e7ff">
+      <rect x="72" y="252" width="108" height="30" rx="15" fill="#ffffff" fill-opacity="0.1" stroke="#a5b4fc" stroke-opacity="0.35"/>
+      <text x="126" y="272" text-anchor="middle">LangGraph</text>
+      <rect x="190" y="252" width="80" height="30" rx="15" fill="#ffffff" fill-opacity="0.1" stroke="#a5b4fc" stroke-opacity="0.35"/>
+      <text x="230" y="272" text-anchor="middle">Ollama</text>
+      <rect x="280" y="252" width="72" height="30" rx="15" fill="#ffffff" fill-opacity="0.1" stroke="#a5b4fc" stroke-opacity="0.35"/>
+      <text x="316" y="272" text-anchor="middle">FAISS</text>
+      <rect x="362" y="252" width="90" height="30" rx="15" fill="#ffffff" fill-opacity="0.1" stroke="#a5b4fc" stroke-opacity="0.35"/>
+      <text x="407" y="272" text-anchor="middle">FastAPI</text>
+      <rect x="462" y="252" width="98" height="30" rx="15" fill="#ffffff" fill-opacity="0.1" stroke="#a5b4fc" stroke-opacity="0.35"/>
+      <text x="511" y="272" text-anchor="middle">Streamlit</text>
+    </g>
+  </g>
+
+  <!-- Agent pipeline -->
+  <g font-family="'Segoe UI', -apple-system, BlinkMacSystemFont, Helvetica, Arial, sans-serif" font-size="15" font-weight="600">
+    <g fill="#ffffff" fill-opacity="0.08" stroke="#a5b4fc" stroke-opacity="0.5">
+      <rect x="930" y="40" width="180" height="44" rx="12"/>
+      <rect x="930" y="104" width="180" height="44" rx="12"/>
+      <rect x="930" y="168" width="180" height="44" rx="12"/>
+      <rect x="930" y="232" width="180" height="44" rx="12"/>
+    </g>
+    <g fill="#ffffff">
+      <text x="952" y="68">🔎  Researcher</text>
+      <text x="952" y="132">📊  Analyst</text>
+      <text x="952" y="196">✍️  Writer</text>
+      <text x="952" y="260">✅  Verifier</text>
+    </g>
+    <g stroke="#a5b4fc" stroke-width="2" fill="none" marker-end="url(#arrow)">
+      <line x1="1020" y1="84" x2="1020" y2="102"/>
+      <line x1="1020" y1="148" x2="1020" y2="166"/>
+      <line x1="1020" y1="212" x2="1020" y2="230"/>
+      <path d="M1110 254 C1170 254 1170 190 1112 190" stroke-dasharray="5 4"/>
+    </g>
+    <text x="1160" y="226" font-size="12" font-weight="500" fill="#c7d2fe">revise</text>
+  </g>
+</svg>

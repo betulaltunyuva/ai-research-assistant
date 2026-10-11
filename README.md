@@ -1,542 +1,305 @@
-# 🔎 AI Research Assistant
+<div align="center">
 
-AI Research Assistant is a multi-agent research platform that combines live web research, local document analysis, Retrieval-Augmented Generation (RAG), persistent memory, and local AI models in a single workflow.
+<img src="docs/images/banner.svg" alt="AI Research Assistant — multi-agent research with web search, RAG, and local LLMs" width="100%" />
 
-The system can research a user query using both web sources and uploaded documents, analyze the collected information, generate a structured report, verify the result, automatically revise it when necessary, and export the final report as PDF or DOCX.
+<br>
+<br>
+
+![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat-square&logo=python&logoColor=white)
+![LangGraph](https://img.shields.io/badge/LangGraph-1.2-1C3C3C?style=flat-square&logo=langchain&logoColor=white)
+![Ollama](https://img.shields.io/badge/Ollama-qwen3:4b-000000?style=flat-square&logo=ollama&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-backend-009688?style=flat-square&logo=fastapi&logoColor=white)
+![Streamlit](https://img.shields.io/badge/Streamlit-UI-FF4B4B?style=flat-square&logo=streamlit&logoColor=white)
+![FAISS](https://img.shields.io/badge/FAISS-vector_search-0467DF?style=flat-square&logo=meta&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-compose-2496ED?style=flat-square&logo=docker&logoColor=white)
+
+**[✨ Features](#-features)** · **[🧠 How It Works](#-how-it-works)** · **[🚀 Quick Start](#-quick-start)** · **[🐳 Docker](#-docker)** · **[🔌 API](#-api)**
+
+<br>
+
+<img src="docs/images/running.png" alt="The Streamlit interface with live agent status while a research runs" width="100%" />
+
+</div>
+
+---
+
+## 📖 About
+
+**AI Research Assistant** answers research questions with a team of four AI agents. It searches the web, reads your own PDF, DOCX, or TXT documents, writes a structured report, checks it, and revises it when needed. Reports can be exported as PDF or DOCX.
+
+> [!TIP]
+> **Runs fully locally. No API keys required.** The language model runs on your machine through [Ollama](https://ollama.com), embeddings are computed locally, and web search uses DuckDuckGo.
 
 ---
 
 ## ✨ Features
 
-- 🤖 Multi-Agent Research Workflow
-- 🌐 Live Web Research
-- 📄 PDF, DOCX and TXT Document Support
-- 🧠 Retrieval-Augmented Generation (RAG)
-- 🔍 FAISS Vector Search
-- 🧩 Local Text Embeddings
-- 💾 Persistent SQLite Memory
-- 💬 Follow-up Questions
-- 🗂️ Research Sessions
-- 📊 Live Agent Status Tracking
-- ✅ Automatic Verification and Revision
-- 🚀 FastAPI Backend
-- 🖥️ Streamlit Web Interface
-- 📄 PDF Report Export
-- 📝 DOCX Report Export
-- 🧪 Automated Tests with Pytest
-- 🐳 Docker & Docker Compose Support
-- 🔐 Environment-based Configuration
+| | Feature | Details |
+|---|---|---|
+| 🤖 | **Multi-agent workflow** | Researcher, Analyst, Writer, and Verifier agents orchestrated with LangGraph |
+| 🌐 | **Live web research** | Searches the web and reads the top sources for every query |
+| 📄 | **Document RAG** | Upload PDF, DOCX, or TXT files; relevant passages are retrieved with FAISS |
+| ✅ | **Self-verification** | The Verifier checks the report and sends it back to the Writer if it needs fixes |
+| 💾 | **Persistent memory** | Sessions, conversations, and past research are stored in SQLite |
+| 💬 | **Follow-up questions** | Ask about a finished report using the session's context |
+| 📊 | **Live agent status** | Watch each agent move from *waiting* to *running* to *done* in real time |
+| 📑 | **Report export** | Download results as Markdown, PDF, or DOCX |
+| 🐳 | **Docker ready** | One command starts both the API and the web interface |
 
 ---
 
-## 🧠 Multi-Agent Architecture
+## 🧠 How It Works
 
-The research process is handled by four specialized agents:
+### Agent workflow
 
-### 1. Researcher
+```mermaid
+flowchart LR
+    Q(["❓ Research question"]) --> R["🔎 Researcher<br/>web + documents"]
+    R --> A["📊 Analyst"]
+    A --> W["✍️ Writer"]
+    W --> V{"✅ Verifier"}
+    V -->|"approved"| F(["📑 Final report"])
+    V -->|"needs fixes"| W
+```
 
-Collects information from live web sources and, when available, uploaded documents.
+| Agent | Role |
+|---|---|
+| 🔎 **Researcher** | Searches the web and, if a document was uploaded, retrieves its most relevant passages |
+| 📊 **Analyst** | Picks out the information that matters for the question |
+| ✍️ **Writer** | Turns the analysis into a structured report |
+| ✅ **Verifier** | Checks the report for consistency and source support; requests a revision if needed (at most once, configurable) |
 
-### 2. Analyst
+### Document RAG pipeline
 
-Analyzes the collected material and identifies the most relevant information for the research question.
+Instead of sending a whole document to the model, only the most relevant parts are used:
 
-### 3. Writer
-
-Creates the final structured research report based on the analyzed evidence.
-
-### 4. Verifier
-
-Checks the generated report for consistency and source support.
-
-If a correction is required, the report is automatically sent back to the Writer for revision.
-
-```text
-User Query
-    │
-    ▼
-Researcher
-    │
-    ▼
-Analyst
-    │
-    ▼
-Writer
-    │
-    ▼
-Verifier
-    │
-    ├── Approved ──► Final Report
-    │
-    └── Revision Required
-              │
-              ▼
-            Writer
-              │
-              ▼
-           Verifier
+```mermaid
+flowchart LR
+    D["📄 PDF / DOCX / TXT"] --> T["Text extraction"]
+    T --> C["Chunking<br/>1000 chars, 150 overlap"]
+    C --> E["Local embeddings<br/>all-MiniLM-L6-v2"]
+    E --> I[("FAISS index")]
+    I --> S["Semantic search"]
+    S --> L["🤖 Local LLM"]
 ```
 
 ---
 
-## 🔎 RAG Pipeline
+## 🛠️ Tech Stack
 
-Uploaded documents are processed through a local RAG pipeline.
-
-```text
-Document
-   │
-   ▼
-Text Extraction
-   │
-   ▼
-Chunking
-   │
-   ▼
-Local Embeddings
-   │
-   ▼
-FAISS Vector Index
-   │
-   ▼
-Semantic Retrieval
-   │
-   ▼
-Relevant Context
-   │
-   ▼
-Local LLM
-```
-
-This allows the assistant to answer questions using relevant sections of uploaded documents instead of sending the entire document to the model.
+| Layer | Technologies |
+|---|---|
+| **Agents** | LangGraph, LangChain |
+| **LLM** | Ollama (default model: `qwen3:4b-instruct`) |
+| **Retrieval** | Sentence Transformers (`all-MiniLM-L6-v2`), FAISS |
+| **Web search** | DuckDuckGo (`ddgs`), BeautifulSoup |
+| **Backend** | FastAPI, Uvicorn |
+| **Frontend** | Streamlit |
+| **Storage** | SQLite |
+| **Documents** | pypdf, python-docx |
+| **Reports** | ReportLab (PDF), python-docx (DOCX) |
+| **Testing** | Pytest |
+| **Deployment** | Docker, Docker Compose |
 
 ---
 
-## 📄 Supported Documents
+## 🚀 Quick Start
 
-The platform currently supports:
+### Prerequisites
 
-- `.pdf`
-- `.docx`
-- `.txt`
-
-Uploaded documents can be used together with live web research.
-
----
-
-## 🧠 Persistent Memory
-
-Research history and conversations are stored using SQLite.
-
-The memory system supports:
-
-- Session-based conversations
-- Previous user messages
-- Assistant responses
-- Previous research topics
-- Research results
-- Follow-up questions
-
-Using the same session name allows previous context to be reused.
-
----
-
-## 📊 Live Agent Status
-
-The Streamlit interface displays the current state of every agent in real time.
-
-Example:
-
-```text
-✅ Researcher — Completed
-✅ Analyst — Completed
-⏳ Writer — Running
-○ Verifier — Waiting
-```
-
-The interface also reflects automatic Writer → Verifier revision cycles.
-
----
-
-## 📑 Research Reports
-
-Completed research can be exported as:
-
-- Markdown
-- Microsoft Word (`.docx`)
-- PDF (`.pdf`)
-
-Generated reports are stored locally inside the output directory.
-
----
-
-## 🏗️ Project Structure
-
-```text
-ai-research-assistant/
-│
-├── agents/
-│   ├── analyst.py
-│   ├── researcher.py
-│   ├── verifier.py
-│   └── writer.py
-│
-├── tests/
-│   ├── test_agent_status.py
-│   ├── test_chunking.py
-│   ├── test_document_reader.py
-│   ├── test_faiss.py
-│   ├── test_memory.py
-│   ├── test_report_exporter.py
-│   ├── test_routing.py
-│   └── test_web_search.py
-│
-├── utils/
-│   ├── agent_status.py
-│   ├── conversation_memory.py
-│   ├── document_rag.py
-│   ├── document_reader.py
-│   ├── embedding.py
-│   ├── page_reader.py
-│   ├── report_exporter.py
-│   ├── report_saver.py
-│   ├── system_check.py
-│   ├── text_chunker.py
-│   ├── vector_store.py
-│   └── web_search.py
-│
-├── api.py
-├── config.py
-├── main.py
-├── settings.py
-├── state.py
-├── web_app.py
-│
-├── Dockerfile
-├── docker-compose.yml
-├── .dockerignore
-├── .gitignore
-├── requirements.txt
-└── README.md
-```
-
----
-
-## 🛠️ Technology Stack
-
-### Backend
-
-- Python
-- FastAPI
-- Uvicorn
-
-### Frontend
-
-- Streamlit
-
-### AI & Retrieval
-
-- Local LLM through Ollama
-- LangChain
-- Sentence Transformers
-- FAISS
-- RAG
-
-### Data & Memory
-
-- SQLite
-
-### Document Processing
-
-- PDF parsing
-- python-docx
-- TXT parsing
-
-### Reporting
-
-- ReportLab
-- python-docx
-
-### Testing
-
-- Pytest
-
-### Deployment
-
-- Docker
-- Docker Compose
-
----
-
-## ⚙️ Local Installation
-
-### 1. Clone the repository
+- **Python 3.10+**
+- **[Ollama](https://ollama.com/download)** with the default model pulled:
 
 ```bash
-git clone <repository-url>
+ollama pull qwen3:4b-instruct
+```
+
+### 1. Clone and install
+
+```bash
+git clone https://github.com/betulaltunyuva/ai-research-assistant.git
 cd ai-research-assistant
-```
-
-### 2. Create a virtual environment
-
-Windows:
-
-```powershell
 python -m venv .venv
-.venv\Scripts\activate
 ```
 
-### 3. Install dependencies
+Activate the virtual environment:
 
-```powershell
-python -m pip install -r requirements.txt
+| Windows (PowerShell) | macOS / Linux |
+|---|---|
+| `.venv\Scripts\activate` | `source .venv/bin/activate` |
+
+Then install the dependencies:
+
+```bash
+pip install -r requirements.txt
 ```
 
-### 4. Configure environment variables
+### 2. Run
 
-Create a `.env` file in the project root.
+The app has two parts, so open two terminals:
 
-Sensitive information such as API keys should be stored only in this file.
-
-The `.env` file is excluded from Git.
-
-### 5. Start Ollama
-
-Make sure Ollama is installed and the configured local model is available.
-
-The local Ollama address defaults to:
-
-```text
-http://127.0.0.1:11434
-```
-
-The model and related settings can be configured in `settings.py`.
-
----
-
-## ▶️ Running Locally
-
-Two services are required.
-
-### Terminal 1 — FastAPI
-
-```powershell
+```bash
+# Terminal 1: API
 uvicorn api:api --reload
 ```
 
-API documentation:
-
-```text
-http://127.0.0.1:8000/docs
-```
-
-### Terminal 2 — Streamlit
-
-```powershell
+```bash
+# Terminal 2: Web interface
 streamlit run web_app.py
 ```
 
-Web interface:
+| Service | Address |
+|---|---|
+| 🖥️ Web interface | http://localhost:8501 |
+| 📚 API docs (Swagger) | http://127.0.0.1:8000/docs |
 
-```text
-http://localhost:8501
-```
+Enter a research question, optionally attach a document, and press **Araştırmayı Başlat** (Start Research):
 
----
+<img src="docs/images/home.png" alt="The research form in the Streamlit interface" width="100%" />
 
-## 🚀 API Endpoints
+> [!NOTE]
+> The first run downloads the embedding model (~90 MB) from Hugging Face.
 
-The FastAPI backend provides endpoints for:
+### ⚙️ Configuration
 
-```text
-GET   /
-GET   /health
-POST  /upload
-POST  /research
-POST  /research/start
-GET   /research/status/{job_id}
-POST  /ask
-GET   /sessions
-GET   /reports
-```
+Model and research settings live in [`settings.py`](settings.py):
 
-Interactive Swagger documentation is available at:
+| Setting | Default | Description |
+|---|---|---|
+| `MODEL_NAME` | `qwen3:4b-instruct` | Ollama model used by the agents |
+| `SEARCH_RESULT_COUNT` | `3` | Web sources read per query |
+| `MAX_REVISIONS` | `1` | How many times the Verifier can send a report back |
+| `MODEL_TEMPERATURE` | `0` | Lower values give more consistent answers |
 
-```text
-http://127.0.0.1:8000/docs
-```
+Environment variables:
 
----
-
-## 🧪 Automated Tests
-
-The project includes automated tests for core components such as:
-
-- Document reading
-- Text chunking
-- FAISS retrieval
-- Persistent memory
-- Agent status tracking
-- Report exporting
-- Agent routing
-- Web search utilities
-
-Run all tests with:
-
-```powershell
-python -m pytest tests -q
-```
+| Variable | Default | Used by |
+|---|---|---|
+| `OLLAMA_BASE_URL` | `http://127.0.0.1:11434` | API: where Ollama is running |
+| `API_URL` | `http://127.0.0.1:8000` | Web interface: where the API is running |
 
 ---
 
 ## 🐳 Docker
 
-The project includes both a `Dockerfile` and `docker-compose.yml`.
+Docker Compose starts two containers: `ai-research-api` (port 8000) and `ai-research-web` (port 8501). Ollama keeps running on your host machine.
 
-Docker Compose starts two services:
+```bash
+# Compose reads environment variables from .env; an empty file is fine
+touch .env            # Windows PowerShell: New-Item .env
 
-```text
-ai-research-api
-ai-research-web
+docker compose up -d --build
 ```
 
-### Build
-
-```powershell
-docker compose build
+```bash
+docker compose ps     # check the containers
+docker compose down   # stop everything
 ```
 
-### Start
+Inside Docker, the API reaches Ollama at `http://host.docker.internal:11434`. Uploaded documents and reports are stored in the `documents/` and `outputs/` folders on your machine.
 
-```powershell
-docker compose up -d
+---
+
+## 🔌 API
+
+Full interactive documentation is available at **http://127.0.0.1:8000/docs**.
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/health` | Health check |
+| `POST` | `/upload` | Upload a PDF, DOCX, or TXT document |
+| `POST` | `/research` | Run a research and wait for the result |
+| `POST` | `/research/start` | Start a research in the background and get a `job_id` |
+| `GET` | `/research/status/{job_id}` | Poll the live status of each agent |
+| `POST` | `/ask` | Ask a follow-up question within a session |
+| `GET` | `/sessions` | List research sessions |
+| `GET` | `/reports` | List saved reports |
+
+<details>
+<summary><b>Example request</b></summary>
+
+```bash
+curl -X POST http://127.0.0.1:8000/research/start \
+  -H "Content-Type: application/json" \
+  -d '{"query": "What is Retrieval-Augmented Generation?", "session_id": "demo"}'
 ```
 
-### Check containers
-
-```powershell
-docker compose ps
-```
-
-### Open the services
-
-FastAPI:
-
-```text
-http://127.0.0.1:8000/docs
-```
-
-Streamlit:
-
-```text
-http://localhost:8501
-```
-
-### Stop
-
-```powershell
-docker compose down
-```
-
-Inside Docker, the API communicates with the host Ollama service through:
-
-```text
-http://host.docker.internal:11434
-```
+</details>
 
 ---
 
 ## 🔐 Security
 
-Sensitive and generated files are excluded from version control, including:
+- **No secrets needed.** The app does not use any API keys. `.env` is ignored by Git in case you add your own settings.
+- **Uploads stay in their folder.** The API only accepts documents from `documents/uploads/`, so a request cannot make the assistant read other files on the server.
+- **Local data stays local.** Uploaded documents, reports, and the memory database are excluded from Git.
 
-```text
-.env
-.venv/
-outputs/
-documents/
-documents/uploads/
-*.db
-*.sqlite
-*.sqlite3
-__pycache__/
-.pytest_cache/
+---
+
+## 🧪 Tests
+
+```bash
+python -m pytest tests -q
 ```
 
-Never commit API keys or credentials directly to the repository.
+The test suite covers document reading, text chunking, FAISS retrieval, memory, agent status, report export, agent routing, web search, and upload-path validation.
 
----
-
-## 🔄 Research Workflow
+<details>
+<summary><b>📁 Project Structure</b></summary>
 
 ```text
-User enters a research question
-          │
-          ▼
-Optional document upload
-          │
-          ▼
-Web + Document Retrieval
-          │
-          ▼
-Researcher
-          │
-          ▼
-Analyst
-          │
-          ▼
-Writer
-          │
-          ▼
-Verifier
-          │
-          ├── Revision needed ──► Writer
-          │
-          ▼
-Final Research Report
-          │
-          ├── PDF
-          └── DOCX
+ai-research-assistant/
+├── agents/                # Researcher, Analyst, Writer, Verifier
+├── utils/
+│   ├── web_search.py      # DuckDuckGo search
+│   ├── page_reader.py     # Reads web pages
+│   ├── document_reader.py # PDF / DOCX / TXT parsing
+│   ├── text_chunker.py    # Splits text into chunks
+│   ├── embedding.py       # Local embeddings
+│   ├── vector_store.py    # FAISS index
+│   ├── document_rag.py    # Retrieval over uploaded documents
+│   ├── conversation_memory.py  # SQLite memory
+│   ├── agent_status.py    # Live job and agent status
+│   ├── report_saver.py    # Saves Markdown reports
+│   ├── report_exporter.py # PDF / DOCX export
+│   └── system_check.py    # Checks that Ollama is ready
+├── tests/                 # Pytest suite
+├── docs/images/           # README images
+├── api.py                 # FastAPI backend
+├── web_app.py             # Streamlit interface
+├── main.py                # LangGraph workflow (also runs as a CLI)
+├── settings.py            # Model and research settings
+├── Dockerfile
+└── docker-compose.yml
 ```
 
----
-
-## 🎯 Project Goals
-
-This project was developed to explore how a production-style research assistant can combine:
-
-- Multi-agent AI systems
-- Retrieval-Augmented Generation
-- Semantic search
-- Local AI models
-- Live web research
-- Persistent memory
-- API-based architecture
-- Automated verification
-- Containerized deployment
-
-The architecture is designed to be modular so that individual components such as the embedding model, LLM, retrieval system, agents, and user interface can be extended independently.
+</details>
 
 ---
 
-## 📌 Future Improvements
+## 🗺️ Roadmap
 
-Possible future extensions include:
-
-- Streaming model responses
-- Source credibility scoring
-- Additional document formats
-- User authentication
-- Research history search
-- Advanced citation verification
-- Cloud deployment
-- Additional local and remote LLM providers
-- Improved observability and logging
+- [x] Multi-agent research with automatic verification
+- [x] Document RAG with FAISS
+- [x] Persistent memory and follow-up questions
+- [x] PDF and DOCX export
+- [x] Docker support
+- [ ] Streaming responses
+- [ ] Source credibility scoring
+- [ ] Better citation checking
+- [ ] User authentication
+- [ ] Search over research history
+- [ ] More LLM providers
 
 ---
 
-## 👩‍💻 Developer
+<div align="center">
 
-Developed by **Betül Altunyuva**
+### 👩‍💻 Betül Altunyuva
 
-Software Engineering
+Software Engineering Student
+
+[![GitHub](https://img.shields.io/badge/GitHub-betulaltunyuva-181717?style=for-the-badge&logo=github)](https://github.com/betulaltunyuva)
+[![Portfolio](https://img.shields.io/badge/Portfolio-Visit-4F46E5?style=for-the-badge&logo=googlechrome&logoColor=white)](https://betulaltunyuva.github.io/react-typescript-web-lab/)
+
+</div>
