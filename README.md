@@ -185,9 +185,6 @@ Environment variables:
 Docker Compose starts two containers: `ai-research-api` (port 8000) and `ai-research-web` (port 8501). Ollama keeps running on your host machine.
 
 ```bash
-# Compose reads environment variables from .env; an empty file is fine
-touch .env            # Windows PowerShell: New-Item .env
-
 docker compose up -d --build
 ```
 
@@ -195,6 +192,8 @@ docker compose up -d --build
 docker compose ps     # check the containers
 docker compose down   # stop everything
 ```
+
+Settings in an optional `.env` file are passed to both containers. Docker Compose v2.24 or newer is required.
 
 Inside Docker, the API reaches Ollama at `http://host.docker.internal:11434`. Uploaded documents and reports are stored in the `documents/` and `outputs/` folders on your machine.
 
@@ -290,6 +289,12 @@ ai-research-assistant/
 - [ ] User authentication
 - [ ] Search over research history
 - [ ] More LLM providers
+
+---
+
+## 📄 License
+
+This project is licensed under the [MIT License](LICENSE).
 
 ---
 
