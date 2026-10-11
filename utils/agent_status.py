@@ -84,6 +84,13 @@ def save_job_error(
         _job_statuses[job_id]["error"] = error
         _job_statuses[job_id]["status"] = "failed"
 
+        # Hata anında çalışan agent "Çalışıyor" durumunda kalmasın.
+        agents = _job_statuses[job_id]["agents"]
+
+        for agent_name, agent_status in agents.items():
+            if agent_status == "running":
+                agents[agent_name] = "failed"
+
 
 def get_job_status(
     job_id: str
