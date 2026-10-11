@@ -30,6 +30,14 @@
 > [!TIP]
 > **Runs fully locally. No API keys required.** The language model runs on your machine through [Ollama](https://ollama.com), embeddings are computed locally, and web search uses DuckDuckGo.
 
+### 📝 Example output
+
+A finished report for *"Retrieval-Augmented Generation (RAG) nedir ve nasıl çalışır?"*, with its web sources and PDF / Word export buttons:
+
+<img src="docs/images/result.png" alt="A finished research report with sources and export buttons" width="100%" />
+
+<sub>On a CPU-only laptop with the default `qwen3:4b-instruct` model, this research took about 7 minutes. A GPU or a smaller model makes it faster.</sub>
+
 ---
 
 ## ✨ Features
