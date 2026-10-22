@@ -1,7 +1,6 @@
 from pathlib import Path
 from uuid import uuid4
 
-import shutil
 import time
 
 from fastapi import (
@@ -37,7 +36,10 @@ from utils.agent_status import (
     get_job_status
 )
 
-from settings import MODEL_NAME
+from settings import (
+    MODEL_NAME,
+    MAX_UPLOAD_SIZE_MB
+)
 
 
 api = FastAPI(
@@ -61,6 +63,11 @@ ALLOWED_EXTENSIONS = {
     ".docx",
     ".txt"
 }
+
+
+MAX_UPLOAD_SIZE_BYTES = (
+    MAX_UPLOAD_SIZE_MB * 1024 * 1024
+)
 
 
 init_memory()
@@ -342,13 +349,30 @@ def upload_document(
         safe_filename
     )
 
+    written_bytes = 0
+
     with open(
         file_path,
         "wb"
     ) as buffer:
-        shutil.copyfileobj(
-            file.file,
-            buffer
+        # Dosyayı parça parça yazar, sınır aşılırsa yüklemeyi durdurur.
+        while chunk := file.file.read(1024 * 1024):
+            written_bytes += len(chunk)
+
+            if written_bytes > MAX_UPLOAD_SIZE_BYTES:
+                break
+
+            buffer.write(chunk)
+
+    if written_bytes > MAX_UPLOAD_SIZE_BYTES:
+        file_path.unlink(missing_ok=True)
+
+        raise HTTPException(
+            status_code=413,
+            detail=(
+                "Dosya çok büyük. En fazla "
+                f"{MAX_UPLOAD_SIZE_MB} MB yüklenebilir."
+            )
         )
 
     return {

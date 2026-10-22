@@ -1,0 +1,7 @@
+[server]
+# Web arayüzü sadece bu bilgisayardan açılabilir.
+# Docker, --server.address 0.0.0.0 ile bu ayarı kendi içinde geçersiz kılar.
+address = "127.0.0.1"
+
+# Yüklenebilecek en büyük dosya boyutu (MB). settings.MAX_UPLOAD_SIZE_MB ile aynı tutulmalı.
+maxUploadSize = 20

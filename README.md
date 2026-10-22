@@ -178,6 +178,7 @@ Model and research settings live in [`settings.py`](settings.py):
 | `SEARCH_RESULT_COUNT` | `3` | Web sources read per query |
 | `MAX_REVISIONS` | `1` | How many times the Verifier can send a report back |
 | `MODEL_TEMPERATURE` | `0` | Lower values give more consistent answers |
+| `MAX_UPLOAD_SIZE_MB` | `20` | Largest document the API accepts (keep `maxUploadSize` in [`.streamlit/config.toml`](.streamlit/config.toml) in sync) |
 
 Environment variables:
 
@@ -185,6 +186,9 @@ Environment variables:
 |---|---|---|
 | `OLLAMA_BASE_URL` | `http://127.0.0.1:11434` | API: where Ollama is running |
 | `API_URL` | `http://127.0.0.1:8000` | Web interface: where the API is running |
+
+> [!IMPORTANT]
+> The API and the web interface have no login, so both only listen on `127.0.0.1` by default (including the Docker ports). Anyone who can reach them can read your sessions and reports and upload files. Only expose them to your network (for example `--host 0.0.0.0`, `--server.address 0.0.0.0`, or `"8000:8000"` in `docker-compose.yml`) on a network you trust.
 
 ---
 
